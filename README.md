@@ -11,6 +11,21 @@ A complete Excel add-in solution that uses machine learning to predict employee 
 - **Sample Data Loading**: Built-in sample data for testing
 - **Professional Formatting**: Results displayed in formatted Excel columns
 
+## 📸 Screenshots
+
+### Main Interface
+![Excel Add-in Interface](screenshots/main-interface.png)
+*The main taskpane showing the Employee Churn Predictor interface with sample data loaded*
+
+### Sample Data Loading
+![Sample Data](screenshots/sample-data.png)
+*Excel worksheet populated with sample employee data ready for prediction*
+
+### Prediction Results
+![Prediction Results](screenshots/prediction-results.png)
+*Churn predictions displayed in a new column with color-coded formatting*
+
+
 ## 🏗️ Architecture
 
 ```
@@ -53,19 +68,37 @@ Excel_web_app/
 - **Python** (v3.7+)
 - **Excel Desktop** (Office 365 or Excel 2019+)
 
+### Dependencies
+
+The project uses the following key dependencies:
+
+**Python Backend:**
+- Flask (Web framework)
+- XGBoost (Machine learning model)
+- NumPy (Numerical computing)
+- scikit-learn (ML utilities)
+- Flask-CORS (Cross-origin requests)
+
+**Frontend:**
+- React (UI framework)
+- Office.js (Excel integration)
+- Webpack (Build tool)
+
+See `flask_server/requirements.txt` and `employe_ml_excel_addin/package.json` for complete dependency lists.
+
 
 ### Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone <your-repo-url>
+   git clone 
    cd Excel_web_app
    ```
 
 2. **Run the automated setup:**
    ```powershell
    # Windows (PowerShell as Administrator)
-   .\start_services.ps1
+   .\start_services.bat
    ```
 
 3. **Or use manual setup:**
@@ -79,6 +112,12 @@ Excel_web_app/
    # Install Node.js dependencies
    cd ../employe_ml_excel_addin
    npm install
+   ```
+
+4. **Alternative: Install from root requirements.txt:**
+   ```bash
+   # From project root directory
+   pip install -r requirements.txt
    ```
 
 ### Running the Application
@@ -159,31 +198,15 @@ The XGBoost model provides:
 - **Features**: 9 employee attributes
 - **Output**: Churn probability (between 0 and 1)
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
+- 
 - Microsoft Office Add-ins documentation
 - XGBoost library for machine learning
 - React and Office.js for the frontend framework
 
-## 📞 Support
 
-For support and questions:
-- Check the troubleshooting guide
-- Review the setup documentation
-- Open an issue on GitHub
-
----
-
-**Made with ❤️ for HR Analytics**
