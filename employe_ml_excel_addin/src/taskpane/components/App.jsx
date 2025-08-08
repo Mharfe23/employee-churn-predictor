@@ -56,16 +56,32 @@ const App = () => {
           // Get the predictions
           const predictions = result.predictions;
           
-          // Find the next empty column to write predictions
+          // Check if prediction columns already exist
           const usedRange = sheet.getUsedRange();
-          usedRange.load("columnCount");
+          usedRange.load("columnCount, values");
           await context.sync();
           
-          const nextColumn = usedRange.columnCount + 1;
-          const predictionColumn = String.fromCharCode(64 + nextColumn); // Convert to letter (A, B, C, etc.)
+          let predictionColumn, yesNoColumn;
           
-          // Create range for predictions (same number of rows as selected data)
-          const predictionRange = sheet.getRange(`${predictionColumn}1:${predictionColumn}${range.values.length}`);
+          // Check if "Churn Probability" and "Will Leave?" columns already exist
+          const headers = usedRange.values[0] || [];
+          const churnProbIndex = headers.findIndex(header => header === "Churn Probability");
+          const willLeaveIndex = headers.findIndex(header => header === "Will Leave?");
+          
+          if (churnProbIndex !== -1 && willLeaveIndex !== -1) {
+            // Use existing columns
+            predictionColumn = String.fromCharCode(65 + churnProbIndex);
+            yesNoColumn = String.fromCharCode(65 + willLeaveIndex);
+          } else {
+            // Create new columns
+            const nextColumn = usedRange.columnCount + 1;
+            predictionColumn = String.fromCharCode(64 + nextColumn);
+            yesNoColumn = String.fromCharCode(65 + nextColumn);
+          }
+          
+          // Create range for predictions (same number of rows as selected data, starting from row 2)
+          const predictionRange = sheet.getRange(`${predictionColumn}2:${predictionColumn}${range.values.length + 1}`);
+          const yesNoRange = sheet.getRange(`${yesNoColumn}2:${yesNoColumn}${range.values.length + 1}`);
           
           // Format predictions as percentages and write to Excel
           const formattedPredictions = predictions.map(pred => {
@@ -73,21 +89,43 @@ const App = () => {
             return [churnProbability.toFixed(4)]; // Format as 4 decimal places
           });
           
+          // Create Yes/No predictions based on threshold (0.5 = 50%)
+          const threshold = 0.5;
+          const yesNoPredictions = predictions.map(pred => {
+            const churnProbability = pred[1]; // Probability of leaving (churn)
+            return [churnProbability >= threshold ? "Yes" : "No"];
+          });
+          
           predictionRange.values = formattedPredictions;
+          yesNoRange.values = yesNoPredictions;
           
-          // Add header for the prediction column
-          const headerRange = sheet.getRange(`${predictionColumn}1`);
-          headerRange.values = [["Churn Probability"]];
+          // Add headers for both columns
+          const predictionHeaderRange = sheet.getRange(`${predictionColumn}1`);
+          const yesNoHeaderRange = sheet.getRange(`${yesNoColumn}1`);
           
-          // Format the header
-          headerRange.format.fill.color = "#4472C4";
-          headerRange.format.font.color = "white";
-          headerRange.format.font.bold = true;
+          predictionHeaderRange.values = [["Churn Probability"]];
+          yesNoHeaderRange.values = [["Will Leave?"]];
+          
+          // Format the headers
+          predictionHeaderRange.format.fill.color = "#4472C4";
+          predictionHeaderRange.format.font.color = "white";
+          predictionHeaderRange.format.font.bold = true;
+          
+          yesNoHeaderRange.format.fill.color = "#C5504B";
+          yesNoHeaderRange.format.font.color = "white";
+          yesNoHeaderRange.format.font.bold = true;
           
           // Format prediction values as percentages
           predictionRange.format.numberFormat = "0.00%";
           
-          setMessage(`Predictions added in column ${predictionColumn}!`);
+          // Format Yes/No column with conditional formatting
+          yesNoRange.format.font.bold = true;
+          
+          if (churnProbIndex !== -1 && willLeaveIndex !== -1) {
+            setMessage(`Predictions updated in columns ${predictionColumn} and ${yesNoColumn}!`);
+          } else {
+            setMessage(`Predictions added in columns ${predictionColumn} and ${yesNoColumn}!`);
+          }
         }
         
       });
@@ -110,13 +148,28 @@ const App = () => {
            "time_spend_company", "Work_accident", "promotion_last_5years", "Department", "salary"]
         ];
         
-        // Sample data rows
+        // Sample data rows - diverse examples representing different scenarios
         const sampleData = [
-          [0.38, 0.53, 2, 157, 3, 0, 0, "sales", "low"],
-          [0.8, 0.86, 5, 262, 6, 0, 0, "sales", "medium"],
-          [0.11, 0.88, 7, 272, 4, 0, 0, "technical", "medium"],
-          [0.72, 0.87, 5, 223, 5, 0, 0, "support", "low"],
-          [0.37, 0.52, 2, 159, 3, 0, 0, "IT", "low"]
+          // High churn risk examples
+          [0.11, 0.88, 7, 272, 4, 0, 0, "technical", "medium"],  // Low satisfaction, high evaluation, many projects
+          [0.15, 0.92, 6, 280, 5, 0, 0, "sales", "low"],         // Very low satisfaction, high evaluation
+          [0.25, 0.85, 8, 265, 6, 0, 0, "IT", "medium"],         // Low satisfaction, many projects, long hours
+          
+          // Medium churn risk examples
+          [0.38, 0.53, 2, 157, 3, 0, 0, "sales", "low"],         // Low satisfaction, low evaluation
+          [0.45, 0.67, 4, 200, 4, 0, 0, "support", "medium"],    // Medium satisfaction, medium evaluation
+          [0.52, 0.78, 5, 220, 5, 0, 0, "marketing", "high"],    // Medium satisfaction, good evaluation
+          
+          // Low churn risk examples
+          [0.72, 0.87, 5, 223, 5, 0, 0, "support", "low"],       // High satisfaction, good evaluation
+          [0.85, 0.91, 4, 180, 3, 1, 1, "management", "high"],   // Very high satisfaction, promoted recently
+          [0.78, 0.82, 3, 160, 2, 0, 1, "hr", "medium"],         // High satisfaction, promoted, few projects
+          [0.90, 0.95, 6, 200, 4, 1, 0, "product_mng", "high"],  // Very high satisfaction, high evaluation
+          
+          // Edge cases
+          [0.30, 0.45, 1, 120, 1, 0, 0, "accounting", "low"],    // New employee, low satisfaction
+          [0.95, 0.98, 7, 250, 8, 1, 1, "RandD", "high"],        // Veteran employee, very satisfied
+          [0.20, 0.75, 9, 300, 7, 0, 0, "technical", "medium"]   // Overworked, low satisfaction
         ];
         
         // Write headers
@@ -127,10 +180,10 @@ const App = () => {
         headerRange.format.font.bold = true;
         
         // Write sample data
-        const dataRange = sheet.getRange("A2:I6");
+        const dataRange = sheet.getRange("A2:I14");
         dataRange.values = sampleData;
         
-        setMessage("Sample data loaded! Select rows 2-6 and click Predict.");
+        setMessage("Sample data loaded! Select rows 2-14 and click Predict.");
         
       });
     } catch (err) {
