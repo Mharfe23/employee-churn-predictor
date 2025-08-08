@@ -13,10 +13,6 @@ A complete Excel add-in solution that uses machine learning to predict employee 
 
 ## 📸 Screenshots
 
-### Main Interface
-![Excel Add-in Interface](screenshots/main-interface.png)
-*The main taskpane showing the Employee Churn Predictor interface with sample data loaded*
-
 ### Sample Data Loading
 ![Sample Data](screenshots/sample-data.png)
 *Excel worksheet populated with sample employee data ready for prediction*
@@ -204,7 +200,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- 
 - Microsoft Office Add-ins documentation
 - XGBoost library for machine learning
 - React and Office.js for the frontend framework
