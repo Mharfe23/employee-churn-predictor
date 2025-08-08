@@ -87,7 +87,7 @@ See `flask_server/requirements.txt` and `employe_ml_excel_addin/package.json` fo
 
 1. **Clone the repository:**
    ```bash
-   git clone 
+   git clone https://github.com/Mharfe23/employee-churn-predictor
    cd Excel_web_app
    ```
 
